@@ -5,67 +5,46 @@
  */
 package metodogauss;
 
-import java.text.DecimalFormat;
-
 /**
  *
  * @author BS
  */
 public class MetodoGauss {
 
-        private static int p;
+    private static final double nuloNum = 1e-5;
 
-        public static void main(String[] args) {
-            int TamanhoMatriz = 3;
-            double[][] A = {
-                    {2, 5, 3 },   // = R1
-                    {5, 3, -10},   // = R2
-                    {1, 1, 1 }   // = R3
-            };
+    public static void main(String[] args) {
+        int TamanhoMatriz = 4;
+        double[][] A = {
+                { 0, 3, 9.3, 11},
+                { 24.5, -8.8, 11.5, - 45.1 },
+                { 52.3, -84, -23.5, 11.4 },
+                { 21, -81, -13.2, 21.5}
+        };
 
-            // Valores apos a igualdade
-            double[] igual = {20, -39, 5};
-            // (R1, R2, R3}
+        double[] igual = { 16.4, -49.7, -80.8, -106.3 };
+        // (R1, R2, R3}
 
+        double[] x = LinearS(A, igual);
+        int num = 1;
 
-            if (Math.abs(A[p][p]) >= 1e-5) { // Se o valor não for muito baixo (1^-10)
-                double d;
-                int cont = (TamanhoMatriz) - 1;
-
-                double[] x = LinearS(A, igual);
-                System.out.printf("Resposta: (");
-
-                for (int i = 0; i < TamanhoMatriz; i++) {
-
-                    //System.out.print(x[i] + ", "); //Resultado Absoluto
-
-                    // D recebe o valor double
-                    d = x[i];
-
-                    DecimalFormat df = new DecimalFormat("#.##");
-                    System.out.printf(df.format(d));
-
-                    //Codigo para separar por virgula os valores
-                    if (cont > 0){
-                        System.out.printf(", ");
-                        cont --;
-                    }
-                }
-                System.out.printf(")");
-            } else {
-                System.out.println("Determinante é nulo");
-            }
+        for (int i = 0; i < TamanhoMatriz; i++) {
+            System.out.printf("x" + num + " = ");
+            System.out.printf("%.4f ", x[i]);
+            System.out.printf("\n");
+            num++;
         }
+
+    }
 
     // Ultilizando o metodo de gauss ele elemina e seleciona um pivô
     public static double[] LinearS(double[][] A, double[] b) {
         int n = b.length;
 
-        for (p = 0; p < n; p++) {
+        for (int p = 0; p < n; p++) {
 
             // Encontra a coluna Pivô e substitui
             int max = p;
-
             for (int i = p + 1; i < n; i++) {
                 if (Math.abs(A[i][p]) > Math.abs(A[max][p])) {
                     max = i;
@@ -74,11 +53,16 @@ public class MetodoGauss {
             double[] temp = A[p]; A[p] = A[max]; A[max] = temp;
             double   t    = b[p]; b[p] = b[max]; b[max] = t;
 
+            // Vê se a matriz tem inversa
+            if (Math.abs(A[p][p]) <= nuloNum) {
+                throw new ArithmeticException("Determinante é 0");
+            }
+
             for (int i = p + 1; i < n; i++) {
-                double matrizA = A[i][p] / A[p][p];
-                b[i] -= matrizA * b[p];
+                double alpha = A[i][p] / A[p][p];
+                b[i] -= alpha * b[p];
                 for (int j = p; j < n; j++) {
-                    A[i][j] -= matrizA * A[p][j];
+                    A[i][j] -= alpha * A[p][j];
                 }
             }
         }
@@ -86,7 +70,6 @@ public class MetodoGauss {
         // Substituição de volta
         double[] x = new double[n];
         for (int i = n - 1; i >= 0; i--) {
-
             double sum = 0.0;
             for (int j = i + 1; j < n; j++) {
                 sum += A[i][j] * x[j];
